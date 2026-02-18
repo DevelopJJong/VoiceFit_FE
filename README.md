@@ -1,70 +1,65 @@
-# Getting Started with Create React App
+# VoiceFit Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+VoiceFit은 사용자의 음성(녹음 또는 업로드)을 분석 API에 전달하고,
+Voice Profile과 추천 리스트를 보여주는 웹 프론트엔드입니다.
 
-## Available Scripts
+## Tech Stack
 
-In the project directory, you can run:
+- Vite + React + TypeScript
+- TailwindCSS
+- State: React `useState`
+- API: `fetch` + `multipart/form-data`
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- 마이크 권한 요청 후 녹음 시작/중지 (MediaRecorder)
+- 오디오 파일 업로드 fallback (`input type="file"`)
+- 분석 요청
+  - `POST {VITE_API_BASE_URL}/analyze`
+  - form field: `file`
+- 결과 표시
+  - Voice Profile 막대그래프(밝음/허스키/부드러움)
+  - Confidence 표시
+  - 추천 카드 Top 5 (커버 이미지/외부 링크/이유 2개)
+- 상태 처리
+  - 로딩 UI
+  - 오류 UI(권한 거부/무음)
+  - API 실패 또는 `mockMode=true` 시 자동 Mock fallback
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Project Structure
 
-### `npm test`
+- `src/pages/Home.tsx`
+- `src/components/Recorder.tsx`
+- `src/components/FileUploader.tsx`
+- `src/components/ProfileBars.tsx`
+- `src/components/Recommendations.tsx`
+- `src/api/client.ts`
+- `src/types.ts`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Environment
 
-### `npm run build`
+`.env`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+VITE_API_BASE_URL=http://localhost:8000
+VITE_MOCK_MODE=false
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- `VITE_MOCK_MODE=true`면 API 호출 없이 mock JSON으로 렌더링합니다.
+- URL 쿼리 `?mockMode=true`도 동일하게 동작합니다.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Run
 
-### `npm run eject`
+```bash
+npm install
+npm run dev
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+개발 서버: `http://localhost:5173`
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Build
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+npm run build
+npm run preview
+```

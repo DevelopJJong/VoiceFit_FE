@@ -5,7 +5,7 @@ type RecorderProps = {
   onError: (message: string) => void;
 };
 
-const MAX_DURATION_SECONDS = 12;
+const MAX_DURATION_SECONDS = 20;
 
 function formatSeconds(seconds: number): string {
   const clamped = Math.max(0, Math.floor(seconds));
@@ -194,7 +194,7 @@ export default function Recorder({ onRecorded, onError }: RecorderProps) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm">
       <h2 className="text-lg font-semibold text-slate-900">녹음하기</h2>
-      <p className="mt-1 text-sm text-slate-600">최대 12초까지 녹음할 수 있고, 자동으로 WAV로 변환됩니다.</p>
+      <p className="mt-1 text-sm text-slate-600">최대 20초까지 녹음할 수 있고, 자동으로 WAV로 변환됩니다.</p>
 
       <div className="mt-4 flex items-center gap-3">
         {!isRecording ? (

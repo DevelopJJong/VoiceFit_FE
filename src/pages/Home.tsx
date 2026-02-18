@@ -10,18 +10,26 @@ export default function Home() {
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const handleAnalyze = async (params: AnalyzeVoiceParams) => {
     setIsLoading(true);
     setError(null);
+    setNotice(null);
 
     try {
       const data = await analyzeVoice(params);
       setResult(data);
     } catch (analyzeError) {
-      const message = analyzeError instanceof Error ? analyzeError.message : '분석 요청 중 오류가 발생했습니다.';
-      setResult(null);
-      setError(message);
+      try {
+        const fallbackData = await analyzeVoice({ ...params, mock: true });
+        setResult(fallbackData);
+        setNotice('분석 서버가 불안정하여 임시 추천 결과를 보여드리고 있습니다.');
+      } catch {
+        const message = analyzeError instanceof Error ? analyzeError.message : '분석 요청 중 오류가 발생했습니다.';
+        setResult(null);
+        setError(message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -65,6 +73,7 @@ export default function Home() {
         <AnalyzeUploader isLoading={isLoading} onAnalyze={handleAnalyze} />
 
         {error ? <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">오류: {error}</p> : null}
+        {notice ? <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">{notice}</p> : null}
 
         {result ? (
           <section className="space-y-4">

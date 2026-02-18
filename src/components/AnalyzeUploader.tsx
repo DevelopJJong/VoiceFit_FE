@@ -8,7 +8,8 @@ type AnalyzeUploaderProps = {
   onAnalyze: (params: AnalyzeVoiceParams) => void;
 };
 
-const MAX_DURATION_SECONDS = 12;
+const MIN_DURATION_SECONDS = 3;
+const MAX_DURATION_SECONDS = 20;
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
 function formatSize(bytes: number): string {
@@ -62,10 +63,12 @@ export default function AnalyzeUploader({ isLoading, onAnalyze }: AnalyzeUploade
 
     try {
       const duration = await readAudioDuration(candidate);
-      if (duration > MAX_DURATION_SECONDS) {
+      if (duration < MIN_DURATION_SECONDS || duration > MAX_DURATION_SECONDS) {
         setFile(null);
         setDurationSec(null);
-        setLocalError(`오디오 길이는 ${MAX_DURATION_SECONDS}초 이하여야 합니다. (현재 ${duration.toFixed(1)}초)`);
+        setLocalError(
+          `오디오 길이는 ${MIN_DURATION_SECONDS}초 이상 ${MAX_DURATION_SECONDS}초 이하여야 합니다. (현재 ${duration.toFixed(1)}초)`,
+        );
         return;
       }
       setFile(candidate);
@@ -151,8 +154,10 @@ export default function AnalyzeUploader({ isLoading, onAnalyze }: AnalyzeUploade
 
             try {
               const duration = await readAudioDuration(file);
-              if (duration > MAX_DURATION_SECONDS) {
-                setLocalError(`오디오 길이는 ${MAX_DURATION_SECONDS}초 이하여야 합니다. (현재 ${duration.toFixed(1)}초)`);
+              if (duration < MIN_DURATION_SECONDS || duration > MAX_DURATION_SECONDS) {
+                setLocalError(
+                  `오디오 길이는 ${MIN_DURATION_SECONDS}초 이상 ${MAX_DURATION_SECONDS}초 이하여야 합니다. (현재 ${duration.toFixed(1)}초)`,
+                );
                 return;
               }
               setDurationSec(duration);

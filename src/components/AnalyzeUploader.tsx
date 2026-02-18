@@ -82,7 +82,7 @@ export default function AnalyzeUploader({ isLoading, onAnalyze }: AnalyzeUploade
   };
 
   const handleRecorded = (blob: Blob) => {
-    const recordedFile = new File([blob], `voicepick-recording-${Date.now()}.wav`, {
+    const recordedFile = new File([blob], `voicefit-recording-${Date.now()}.wav`, {
       type: 'audio/wav',
     });
     void assignValidatedFile(recordedFile);

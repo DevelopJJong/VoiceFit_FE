@@ -62,9 +62,9 @@ export default function Home() {
         <header className="rounded-2xl border border-white/60 bg-white/70 px-5 py-4 shadow-sm backdrop-blur">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <img src="/voicepick-logo.png" alt="VoicePick 로고" className="h-11 w-11 rounded-xl object-cover" />
+              <img src="/voicefit-logo.png" alt="VoiceFit 로고" className="h-11 w-11 rounded-xl object-cover" />
               <div>
-                <h1 className="text-2xl font-black tracking-tight text-slate-900">VoicePick</h1>
+                <h1 className="text-2xl font-black tracking-tight text-slate-900">VoiceFit</h1>
                 <p className="text-xs text-slate-500">내 목소리에 딱 맞는 곡 추천 서비스</p>
               </div>
             </div>

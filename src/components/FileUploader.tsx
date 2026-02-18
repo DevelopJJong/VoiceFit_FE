@@ -11,7 +11,7 @@ export default function FileUploader({ onSelectFile }: FileUploaderProps) {
       <p className="mt-1 text-sm text-slate-600">녹음이 어렵다면 오디오 파일을 직접 업로드하세요.</p>
       <input
         type="file"
-        accept="audio/*"
+        accept="audio/wav"
         onChange={(event: ChangeEvent<HTMLInputElement>) => {
           const file = event.target.files?.[0];
           if (!file) return;

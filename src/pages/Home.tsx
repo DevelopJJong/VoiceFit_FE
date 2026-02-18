@@ -1,52 +1,27 @@
 import { useState } from 'react';
-import { analyzeVoice } from '../api/client';
-import FileUploader from '../components/FileUploader';
+import { analyzeVoice } from '../services/voicefit';
+import AnalyzeUploader from '../components/AnalyzeUploader';
 import ProfileBars from '../components/ProfileBars';
-import Recorder from '../components/Recorder';
 import Recommendations from '../components/Recommendations';
-import type { AnalyzeResponse } from '../types';
+import type { AnalyzeResponse, AnalyzeVoiceParams } from '../types';
 
 export default function Home() {
-  const [selectedAudio, setSelectedAudio] = useState<Blob | File | null>(null);
-  const [selectedName, setSelectedName] = useState<string>('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mockNotice, setMockNotice] = useState<string | null>(null);
 
-  const handleRecorded = (blob: Blob) => {
-    setSelectedAudio(blob);
-    setSelectedName(`recorded-${new Date().toISOString()}.webm`);
-    setError(null);
-    setMockNotice(null);
-  };
-
-  const handleUploaded = (file: File) => {
-    setSelectedAudio(file);
-    setSelectedName(file.name);
-    setError(null);
-    setMockNotice(null);
-  };
-
-  const handleAnalyze = async () => {
-    if (!selectedAudio) {
-      setError('먼저 녹음하거나 파일을 업로드해주세요.');
-      return;
-    }
-
+  const handleAnalyze = async (params: AnalyzeVoiceParams) => {
     setIsLoading(true);
     setError(null);
-    setMockNotice(null);
 
     try {
-      const response = await analyzeVoice(selectedAudio);
-      setResult(response.data);
-      if (response.usedMock) {
-        setMockNotice(`Mock 결과 표시 중: ${response.fallbackReason ?? 'API fallback'}`);
-      }
-    } catch {
+      const data = await analyzeVoice(params);
+      setResult(data);
+    } catch (analyzeError) {
+      const message = analyzeError instanceof Error ? analyzeError.message : '분석 요청 중 오류가 발생했습니다.';
       setResult(null);
-      setError('분석 요청 중 오류가 발생했습니다.');
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -55,34 +30,41 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#e0f2fe_0%,_#f8fafc_40%,_#f1f5f9_100%)] px-4 py-8 text-slate-800">
       <main className="mx-auto w-full max-w-5xl space-y-6">
-        <header className="flex items-center justify-between rounded-2xl border border-white/60 bg-white/70 px-5 py-4 shadow-sm backdrop-blur">
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">VoiceFit</h1>
-          <p className="text-sm text-slate-600">당신의 음색에 맞는 추천</p>
+        <header className="rounded-2xl border border-white/60 bg-white/70 px-5 py-4 shadow-sm backdrop-blur">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <img src="/voicepick-logo.png" alt="VoicePick 로고" className="h-11 w-11 rounded-xl object-cover" />
+              <div>
+                <h1 className="text-2xl font-black tracking-tight text-slate-900">VoicePick</h1>
+                <p className="text-xs text-slate-500">내 목소리에 딱 맞는 곡 추천 서비스</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsLoggedIn(true)}
+                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                로그인
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsLoggedIn(false)}
+                className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
+              >
+                로그아웃
+              </button>
+            </div>
+          </div>
+          <div className="mt-3 rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-600">
+            {isLoggedIn ? '환영합니다, 사용자님' : '로그인 후 맞춤 추천을 더 정확히 받아보세요.'}
+          </div>
         </header>
 
-        <section className="grid gap-4 md:grid-cols-2">
-          <Recorder onRecorded={handleRecorded} onError={setError} />
-          <FileUploader onSelectFile={handleUploaded} />
-        </section>
+        <AnalyzeUploader isLoading={isLoading} onAnalyze={handleAnalyze} />
 
-        <section className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">분석 요청</h2>
-          <p className="mt-1 text-sm text-slate-600">선택된 오디오: {selectedName || '없음'}</p>
-          <button
-            type="button"
-            disabled={isLoading}
-            onClick={handleAnalyze}
-            className="mt-4 rounded-lg bg-cyan-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:bg-slate-400"
-          >
-            {isLoading ? '분석 중...' : '분석 요청'}
-          </button>
-          {error ? (
-            <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">오류: {error}</p>
-          ) : null}
-          {mockNotice ? (
-            <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">{mockNotice}</p>
-          ) : null}
-        </section>
+        {error ? <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">오류: {error}</p> : null}
 
         {result ? (
           <section className="space-y-4">
@@ -100,21 +82,11 @@ export default function Home() {
                 <p>{result.input_info.note}</p>
               </div>
             </section>
-            <div className="grid gap-4 md:grid-cols-2">
-              <ProfileBars profile={result.profile} />
-              <Recommendations recommendations={result.recommendations} />
-            </div>
+
+            <ProfileBars profile={result.profile} />
+            <Recommendations recommendations={result.recommendations} />
           </section>
         ) : null}
-
-        <section className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">How it works</h2>
-          <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-slate-700">
-            <li>마이크로 녹음하거나 오디오 파일을 업로드합니다.</li>
-            <li>선택된 파일을 `multipart/form-data`로 `/analyze`에 전송합니다.</li>
-            <li>API 실패 또는 mockMode=true 시 mock JSON으로 렌더링합니다.</li>
-          </ol>
-        </section>
       </main>
     </div>
   );

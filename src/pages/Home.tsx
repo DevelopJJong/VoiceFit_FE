@@ -1,9 +1,24 @@
 import { useState } from 'react';
-import { analyzeVoice } from '../services/voicefit';
+import { analyzeVoice, VoicefitApiError } from '../services/voicefit';
 import AnalyzeUploader from '../components/AnalyzeUploader';
 import ProfileBars from '../components/ProfileBars';
 import Recommendations from '../components/Recommendations';
 import type { AnalyzeResponse, AnalyzeVoiceParams } from '../types';
+
+const NO_MOCK_FALLBACK_CODES = new Set([
+  'UNSUPPORTED_FORMAT',
+  'FILE_TOO_LARGE',
+  'EMPTY_FILE',
+  'INVALID_WAV',
+  'UNSUPPORTED_WAV_ENCODING',
+  'AUDIO_DECODE_ERROR',
+  'INVALID_AUDIO_SIGNAL',
+  'AUDIO_TOO_SHORT',
+  'SILENT_AUDIO',
+  'NON_VOCAL_INPUT',
+  'INVALID_BOOLEAN',
+  'INVALID_VOCAL_RANGE_MODE',
+]);
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -21,6 +36,12 @@ export default function Home() {
       const data = await analyzeVoice(params);
       setResult(data);
     } catch (analyzeError) {
+      if (analyzeError instanceof VoicefitApiError && analyzeError.code && NO_MOCK_FALLBACK_CODES.has(analyzeError.code)) {
+        setResult(null);
+        setError(analyzeError.message);
+        return;
+      }
+
       try {
         const fallbackData = await analyzeVoice({ ...params, mock: true });
         setResult(fallbackData);

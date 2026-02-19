@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { buildPlatformLinks, collectTagGroups, filterRecommendations } from '../services/recommendations';
+import { buildPlatformLinks, collectTagGroups, filterRecommendations, findFallbackCoverUrl } from '../services/recommendations';
 import type { Recommendation, RecommendationFilter } from '../types';
 
 type RecommendationsProps = {
@@ -13,9 +13,17 @@ const DEFAULT_FILTER: RecommendationFilter = {
   rangeLevel: 'all',
 };
 
+function normalizeCoverUrl(url?: string): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith('//')) return `https:${url}`;
+  if (url.startsWith('http://')) return `https://${url.slice('http://'.length)}`;
+  return url;
+}
+
 export default function Recommendations({ recommendations }: RecommendationsProps) {
   const [filter, setFilter] = useState<RecommendationFilter>(DEFAULT_FILTER);
   const [animatedScores, setAnimatedScores] = useState<Record<string, number>>({});
+  const [fallbackCovers, setFallbackCovers] = useState<Record<string, string>>({});
 
   const { genreTags, moodTags } = useMemo(() => collectTagGroups(recommendations), [recommendations]);
   const filtered = useMemo(() => filterRecommendations(recommendations, filter), [recommendations, filter]);
@@ -40,6 +48,38 @@ export default function Recommendations({ recommendations }: RecommendationsProp
 
     return () => window.clearTimeout(timer);
   }, [filtered]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadFallbackCovers = async () => {
+      const results = await Promise.all(
+        top5.map(async (item, index) => {
+          const cardKey = `${item.rank}-${item.title}-${index}`;
+          const baseCover = normalizeCoverUrl(item.cover_url);
+          if (baseCover) return [cardKey, baseCover] as const;
+
+          const fallback = await findFallbackCoverUrl(item.title, item.artist);
+          return fallback ? ([cardKey, fallback] as const) : undefined;
+        }),
+      );
+
+      if (isCancelled) return;
+
+      const next: Record<string, string> = {};
+      results.forEach((entry) => {
+        if (!entry) return;
+        next[entry[0]] = entry[1];
+      });
+      setFallbackCovers(next);
+    };
+
+    void loadFallbackCovers();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [top5]);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm">
@@ -97,13 +137,14 @@ export default function Recommendations({ recommendations }: RecommendationsProp
           const cardKey = `${item.rank}-${item.title}-${index}`;
           const animatedScore = animatedScores[cardKey] ?? 0;
           const links = buildPlatformLinks(item);
+          const coverUrl = fallbackCovers[cardKey];
 
           return (
             <article key={cardKey} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              {item.cover_url ? (
+              {coverUrl ? (
                 <div className="flex h-64 w-full items-center justify-center bg-slate-100">
                   <img
-                    src={item.cover_url}
+                    src={coverUrl}
                     alt={`${item.title} cover`}
                     className="h-full w-full object-contain"
                     loading="lazy"

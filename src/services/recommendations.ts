@@ -1,5 +1,7 @@
 import type { PlatformLinks, Recommendation, RecommendationFilter } from '../types';
 
+const ITUNES_SEARCH_URL = 'https://itunes.apple.com/search';
+
 export function buildPlatformLinks(recommendation: Recommendation): PlatformLinks {
   if (recommendation.platform_urls) return recommendation.platform_urls;
 
@@ -9,6 +11,25 @@ export function buildPlatformLinks(recommendation: Recommendation): PlatformLink
     melon: `https://www.melon.com/search/total/index.htm?q=${query}`,
     spotify: `https://open.spotify.com/search/${query}`,
   };
+}
+
+export async function findFallbackCoverUrl(title: string, artist: string): Promise<string | undefined> {
+  const term = encodeURIComponent(`${title} ${artist}`);
+
+  try {
+    const response = await fetch(`${ITUNES_SEARCH_URL}?term=${term}&entity=song&limit=1`);
+    if (!response.ok) return undefined;
+
+    const data = (await response.json()) as {
+      results?: Array<{ artworkUrl100?: string; artworkUrl60?: string }>;
+    };
+    const artwork = data.results?.[0]?.artworkUrl100 ?? data.results?.[0]?.artworkUrl60;
+    if (!artwork) return undefined;
+
+    return artwork.replace(/\d+x\d+bb/, '512x512bb');
+  } catch {
+    return undefined;
+  }
 }
 
 export function filterRecommendations(recommendations: Recommendation[], filter: RecommendationFilter): Recommendation[] {

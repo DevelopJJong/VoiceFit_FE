@@ -1,4 +1,4 @@
-import type { AnalyzeResponse, AnalyzeVoiceParams, ApiErrorEnvelope, HealthResponse } from '../types';
+import type { AnalyzeResponse, AnalyzeVoiceParams, ApiErrorEnvelope, HealthResponse, Recommendation } from '../types';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? 'https://port-0-voicefit-be-mk17w6662a83f852.sel3.cloudtype.app';
@@ -64,6 +64,91 @@ async function parseError(response: Response): Promise<VoicefitApiError> {
   }
 }
 
+function asObject(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim().length > 0 ? value : undefined;
+}
+
+function asNumber(value: unknown, fallback = 0): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function asStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+}
+
+function normalizeRecommendation(raw: unknown): Recommendation {
+  const item = asObject(raw);
+  const platformUrls = asObject(item.platform_urls ?? item.platformUrls);
+
+  const coverUrl =
+    asString(item.cover_url) ??
+    asString(item.coverUrl) ??
+    asString(item.album_cover) ??
+    asString(item.albumCover) ??
+    asString(item.album_cover_url) ??
+    asString(item.albumCoverUrl) ??
+    asString(item.image_url) ??
+    asString(item.imageUrl) ??
+    asString(item.thumbnail_url) ??
+    asString(item.thumbnailUrl) ??
+    asString(item.artwork_url) ??
+    asString(item.artworkUrl);
+
+  return {
+    rank: asNumber(item.rank),
+    title: asString(item.title) ?? '',
+    artist: asString(item.artist) ?? '',
+    score: asNumber(item.score),
+    match_percent: asNumber(item.match_percent ?? item.matchPercent),
+    reasons: asStringArray(item.reasons),
+    tags: asStringArray(item.tags),
+    difficulty: asNumber(item.difficulty),
+    range_level: asNumber(item.range_level ?? item.rangeLevel),
+    external_url: asString(item.external_url ?? item.externalUrl),
+    cover_url: coverUrl,
+    preview_url: asString(item.preview_url ?? item.previewUrl),
+    platform_urls: {
+      youtube: asString(platformUrls.youtube),
+      melon: asString(platformUrls.melon),
+      spotify: asString(platformUrls.spotify),
+    },
+  };
+}
+
+function normalizeAnalyzeResponse(payload: unknown): AnalyzeResponse {
+  const data = asObject(payload);
+  const profile = asObject(data.profile);
+  const inputInfo = asObject(data.input_info ?? data.inputInfo);
+  const filters = asObject(data.filters);
+  const recommendations = Array.isArray(data.recommendations)
+    ? data.recommendations.map((item) => normalizeRecommendation(item))
+    : [];
+
+  return {
+    profile: {
+      brightness: asNumber(profile.brightness),
+      husky: asNumber(profile.husky),
+      softness: asNumber(profile.softness),
+    },
+    summary: asString(data.summary) ?? '',
+    confidence: asNumber(data.confidence),
+    input_info: {
+      duration_sec: asNumber(inputInfo.duration_sec ?? inputInfo.durationSec),
+      signal_quality: (asString(inputInfo.signal_quality ?? inputInfo.signalQuality) as 'good' | 'ok' | 'bad') ?? 'ok',
+      note: asString(inputInfo.note) ?? '',
+    },
+    filters: {
+      vocal_range_mode: (asString(filters.vocal_range_mode ?? filters.vocalRangeMode) as 'male' | 'female' | 'any') ?? 'any',
+      allow_cross_gender: Boolean(filters.allow_cross_gender ?? filters.allowCrossGender),
+    },
+    recommendations,
+  };
+}
+
 export async function healthCheck(): Promise<HealthResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}/health`);
@@ -99,7 +184,8 @@ export async function analyzeVoice({
       throw await parseError(response);
     }
 
-    return (await response.json()) as AnalyzeResponse;
+    const payload = await response.json();
+    return normalizeAnalyzeResponse(payload);
   } catch (error) {
     if (error instanceof Error) throw error;
     throw new Error('네트워크 오류로 분석 요청에 실패했습니다.');

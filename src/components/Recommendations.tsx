@@ -159,7 +159,7 @@ export default function Recommendations({ recommendations }: RecommendationsProp
           const animatedScore = animatedScores[cardKey] ?? 0;
           const links = buildPlatformLinks(item);
           const coverUrl = fallbackCovers[cardKey];
-          const reasonsToRender = item.reasons.length > 0 ? item.reasons.slice(0, 2) : ['추천 이유 준비 중'];
+          const reasonsToRender = item.reasons.length > 0 ? item.reasons.slice(0, 2) : ['AI 추천 이유 준비 중'];
           const aiBadgeLabel = item.ai_generated === true ? 'AI 분석 이유' : item.ai_generated === false ? '기본 추천 이유' : null;
 
           return (
@@ -211,11 +211,11 @@ export default function Recommendations({ recommendations }: RecommendationsProp
                     음역 {item.range_level} · {toRangeDetail(item.range_level)}
                   </span>
                 </div>
-                <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs font-semibold text-slate-700">추천 이유</p>
+                <div className="mt-3 rounded-xl border border-cyan-100 bg-gradient-to-br from-cyan-50 to-white p-3 shadow-inner">
+                  <p className="text-xs font-semibold tracking-wide text-cyan-800">AI 추천 이유</p>
                   <ul className="mt-2 space-y-2 text-sm text-slate-800">
                     {reasonsToRender.map((reasonText, reasonIdx) => (
-                      <li key={`${reasonText}-${reasonIdx}`} className="rounded-lg bg-white px-2.5 py-2 leading-5 ring-1 ring-slate-200">
+                      <li key={`${reasonText}-${reasonIdx}`} className="rounded-lg border border-cyan-100 bg-white px-2.5 py-2 leading-5">
                         {reasonText}
                       </li>
                     ))}

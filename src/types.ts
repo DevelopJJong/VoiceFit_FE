@@ -31,6 +31,7 @@ export type Recommendation = {
   score: number;
   match_percent: number;
   reasons: string[];
+  ai_generated?: boolean;
   tags: string[];
   difficulty: number;
   range_level: number;

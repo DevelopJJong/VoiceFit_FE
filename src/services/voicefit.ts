@@ -105,6 +105,7 @@ function normalizeRecommendation(raw: unknown): Recommendation {
     score: asNumber(item.score),
     match_percent: asNumber(item.match_percent ?? item.matchPercent),
     reasons: asStringArray(item.reasons),
+    ai_generated: typeof (item.ai_generated ?? item.aiGenerated) === 'boolean' ? Boolean(item.ai_generated ?? item.aiGenerated) : undefined,
     tags: asStringArray(item.tags),
     difficulty: asNumber(item.difficulty),
     range_level: asNumber(item.range_level ?? item.rangeLevel),

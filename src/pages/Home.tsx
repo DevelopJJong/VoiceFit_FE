@@ -291,6 +291,17 @@ export default function Home() {
         {viewMode === 'analyze' ? (
           <>
             <AnalyzeUploader isLoading={isLoading} onAnalyze={handleAnalyze} />
+            {isLoading ? (
+              <section className="rounded-2xl border border-cyan-200 bg-cyan-50/90 px-4 py-3 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-cyan-300 border-t-cyan-700" />
+                  <div>
+                    <p className="text-sm font-semibold text-cyan-900">음성 분석 진행 중</p>
+                    <p className="text-xs text-cyan-700">추천 이유 생성 단계에서 시간이 조금 더 걸릴 수 있습니다.</p>
+                  </div>
+                </div>
+              </section>
+            ) : null}
             <RecordingGuide errorMessage={error} />
             <AnalysisHistory records={analysisHistory} onLoadRecord={loadFromHistory} />
 

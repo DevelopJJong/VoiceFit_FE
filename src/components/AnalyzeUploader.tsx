@@ -167,10 +167,20 @@ export default function AnalyzeUploader({ isLoading, onAnalyze }: AnalyzeUploade
               setLocalError('오디오 길이를 확인할 수 없습니다.');
             }
           }}
-          className="rounded-lg bg-cyan-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:bg-slate-400"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:bg-slate-400"
         >
-          {isLoading ? '분석 중...' : '보이스핏 분석 시작'}
+          {isLoading ? (
+            <>
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              분석 중...
+            </>
+          ) : '보이스핏 분석 시작'}
         </button>
+        {isLoading ? (
+          <p className="text-xs text-cyan-700">
+            음성 특징 추출과 추천 계산을 진행하고 있습니다. 보통 5~15초 정도 소요됩니다.
+          </p>
+        ) : null}
       </div>
     </section>
   );

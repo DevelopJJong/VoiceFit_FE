@@ -138,6 +138,8 @@ export default function Recommendations({ recommendations }: RecommendationsProp
           const animatedScore = animatedScores[cardKey] ?? 0;
           const links = buildPlatformLinks(item);
           const coverUrl = fallbackCovers[cardKey];
+          const reasonsToRender = item.reasons.length > 0 ? item.reasons.slice(0, 2) : ['추천 이유 준비 중'];
+          const aiBadgeLabel = item.ai_generated === true ? 'AI 분석 이유' : item.ai_generated === false ? '기본 추천 이유' : null;
 
           return (
             <article key={cardKey} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -154,9 +156,16 @@ export default function Recommendations({ recommendations }: RecommendationsProp
               <div className="p-5">
                 <div className="flex items-start gap-2">
                   <div>
-                    <p className="inline-flex items-center rounded-full bg-cyan-700 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
-                      추천 #{item.rank}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="inline-flex items-center rounded-full bg-cyan-700 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
+                        추천 #{item.rank}
+                      </p>
+                      {aiBadgeLabel ? (
+                        <span className="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-[11px] font-semibold text-cyan-700">
+                          {aiBadgeLabel}
+                        </span>
+                      ) : null}
+                    </div>
                     <h3 className="mt-2 text-base font-semibold text-slate-900">{item.title}</h3>
                     <p className="text-sm text-slate-600">{item.artist}</p>
                   </div>
@@ -173,11 +182,16 @@ export default function Recommendations({ recommendations }: RecommendationsProp
                     />
                   </div>
                 </div>
-                <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-700">
-                  {item.reasons.slice(0, 2).map((reasonText, reasonIdx) => (
-                    <li key={`${reasonText}-${reasonIdx}`}>{reasonText}</li>
-                  ))}
-                </ul>
+                <div className="mt-3 rounded-xl border border-cyan-100 bg-cyan-50/60 p-3">
+                  <p className="text-xs font-semibold text-cyan-800">추천 이유</p>
+                  <ul className="mt-2 space-y-2 text-sm text-slate-800">
+                    {reasonsToRender.map((reasonText, reasonIdx) => (
+                      <li key={`${reasonText}-${reasonIdx}`} className="rounded-lg bg-white/90 px-2.5 py-2 leading-5 shadow-sm ring-1 ring-cyan-100">
+                        {reasonText}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   <a href={links.youtube} target="_blank" rel="noreferrer" className="text-xs font-semibold text-cyan-700 hover:text-cyan-800">YouTube</a>

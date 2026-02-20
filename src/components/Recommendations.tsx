@@ -186,11 +186,19 @@ export default function Recommendations({ recommendations }: RecommendationsProp
                     />
                   </div>
                 </div>
-                <div className="mt-3 rounded-xl border border-cyan-100 bg-cyan-50/60 p-3">
-                  <p className="text-xs font-semibold text-cyan-800">추천 이유</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                    난이도 {item.difficulty}
+                  </span>
+                  <span className="inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                    음역 {item.range_level}
+                  </span>
+                </div>
+                <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs font-semibold text-slate-700">추천 이유</p>
                   <ul className="mt-2 space-y-2 text-sm text-slate-800">
                     {reasonsToRender.map((reasonText, reasonIdx) => (
-                      <li key={`${reasonText}-${reasonIdx}`} className="rounded-lg bg-white/90 px-2.5 py-2 leading-5 shadow-sm ring-1 ring-cyan-100">
+                      <li key={`${reasonText}-${reasonIdx}`} className="rounded-lg bg-white px-2.5 py-2 leading-5 ring-1 ring-slate-200">
                         {reasonText}
                       </li>
                     ))}

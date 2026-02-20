@@ -228,8 +228,8 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <img src="/voicefit-logo.png" alt="VoiceFit 로고" className="h-11 w-11 rounded-xl object-cover" />
               <div>
-                <h1 className="text-2xl font-black tracking-tight text-slate-900">VoiceFit</h1>
-                <p className="text-xs text-slate-500">내 목소리에 딱 맞는 곡 추천 서비스</p>
+                <h1 className="text-2xl font-black tracking-tight text-slate-900">VoiceFit - 맞춤 곡 추천 AI</h1>
+                <p className="text-xs text-slate-500">음색 분석 후 내 목소리에 딱 맞는 곡 추천 AI 서비스</p>
               </div>
             </div>
 

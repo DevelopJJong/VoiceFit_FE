@@ -27,9 +27,13 @@ export default function Recommendations({ recommendations }: RecommendationsProp
 
   const { genreTags, moodTags } = useMemo(() => collectTagGroups(recommendations), [recommendations]);
   const filtered = useMemo(() => filterRecommendations(recommendations, filter), [recommendations, filter]);
-  const top5 = [...filtered]
-    .sort((a, b) => a.rank - b.rank)
-    .slice(0, 5);
+  const top5 = useMemo(
+    () =>
+      [...filtered]
+        .sort((a, b) => a.rank - b.rank)
+        .slice(0, 5),
+    [filtered],
+  );
 
   useEffect(() => {
     const zeroState = top5.reduce<Record<string, number>>((acc, item, index) => {

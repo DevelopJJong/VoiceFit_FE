@@ -20,6 +20,23 @@ function normalizeCoverUrl(url?: string): string | undefined {
   return url;
 }
 
+function toDifficultyGrade(level: number): string {
+  const grades = ['A', 'B', 'C', 'D', 'E'];
+  return grades[Math.max(1, Math.min(5, Math.round(level))) - 1];
+}
+
+function toRangeDetail(level: number): string {
+  const clamped = Math.max(1, Math.min(5, Math.round(level)));
+  const labels: Record<number, string> = {
+    1: '저음 중심',
+    2: '중저음',
+    3: '중음',
+    4: '중고음',
+    5: '고음 중심',
+  };
+  return labels[clamped];
+}
+
 export default function Recommendations({ recommendations }: RecommendationsProps) {
   const [filter, setFilter] = useState<RecommendationFilter>(DEFAULT_FILTER);
   const [animatedScores, setAnimatedScores] = useState<Record<string, number>>({});
@@ -116,11 +133,11 @@ export default function Recommendations({ recommendations }: RecommendationsProp
           className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs"
         >
           <option value="all">난이도 전체</option>
-          <option value="1">난이도 1</option>
-          <option value="2">난이도 2</option>
-          <option value="3">난이도 3</option>
-          <option value="4">난이도 4</option>
-          <option value="5">난이도 5</option>
+          <option value="1">난이도 A</option>
+          <option value="2">난이도 B</option>
+          <option value="3">난이도 C</option>
+          <option value="4">난이도 D</option>
+          <option value="5">난이도 E</option>
         </select>
         <select
           value={filter.rangeLevel}
@@ -128,11 +145,11 @@ export default function Recommendations({ recommendations }: RecommendationsProp
           className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs"
         >
           <option value="all">음역 전체</option>
-          <option value="1">음역 1</option>
-          <option value="2">음역 2</option>
-          <option value="3">음역 3</option>
-          <option value="4">음역 4</option>
-          <option value="5">음역 5</option>
+          <option value="1">음역 1 · 저음 중심</option>
+          <option value="2">음역 2 · 중저음</option>
+          <option value="3">음역 3 · 중음</option>
+          <option value="4">음역 4 · 중고음</option>
+          <option value="5">음역 5 · 고음 중심</option>
         </select>
       </div>
 
@@ -188,10 +205,10 @@ export default function Recommendations({ recommendations }: RecommendationsProp
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <span className="inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                    난이도 {item.difficulty}
+                    난이도 {toDifficultyGrade(item.difficulty)}
                   </span>
                   <span className="inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                    음역 {item.range_level}
+                    음역 {item.range_level} · {toRangeDetail(item.range_level)}
                   </span>
                 </div>
                 <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
